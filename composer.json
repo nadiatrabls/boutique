@@ -1,0 +1,19 @@
+{
+    "name": "manu/boutique",
+    "autoload": {
+        "psr-4": {
+            "Boutique\\": "src/",
+            "App\\": "App/"
+
+        }
+    },
+    "authors": [
+        {
+            "name": "Manu",
+            "email": "manu@manu.fr"
+        }
+    ],
+    "require": {
+        "symfony/var-dumper": "^6.4"
+    }
+}
