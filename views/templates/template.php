@@ -54,7 +54,7 @@
 					<div class="collapse navbar-collapse offset" id="navbarSupportedContent">
 						<ul class="nav navbar-nav menu_nav ml-auto">
 							<li class="nav-item active"><a class="nav-link" href="/">Accueil</a></li>
-							<!-- <li class="nav-item active"><a class="nav-link" href="/produits">Boutique</a></li> -->
+							<li class="nav-item active"><a class="nav-link" href="/produits">Boutique</a></li> 
 							<li class="nav-item submenu dropdown">
 								<a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"
 								 aria-expanded="false">Boutique</a>
@@ -62,12 +62,12 @@
 									<li class="nav-item"><a class="nav-link" href="category.html">Catégories des produits</a></li>
 									<li class="nav-item"><a class="nav-link" href="single-product.html">Details des produits</a></li>
 									<li class="nav-item"><a class="nav-link" href="checkout.html">Liste des favoris</a></li>
-									<!-- <li class="nav-item"><a class="nav-link" href="cart.html">Shopping Cart</a></li>
-									<li class="nav-item"><a class="nav-link" href="confirmation.html">Confirmation</a></li> -->
+									 <li class="nav-item"><a class="nav-link" href="cart.html">Shopping Cart</a></li>
+									<li class="nav-item"><a class="nav-link" href="confirmation.html">Confirmation</a></li> 
 								</ul>
 							</li>
 							<li class="nav-item active"><a class="nav-link" href="/">Blog</a></li>
-							<!-- <li class="nav-item submenu dropdown">
+							 <li class="nav-item submenu dropdown">
 								<a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"
 								 aria-expanded="false">Pages</a>
 								<ul class="dropdown-menu">
@@ -75,7 +75,7 @@
 									<li class="nav-item"><a class="nav-link" href="tracking.html">Tracking</a></li>
 									<li class="nav-item"><a class="nav-link" href="elements.html">Elements</a></li>
 								</ul>
-							</li> -->
+							</li> 
 							<li class="nav-item"><a class="nav-link" href="contact.html">Contact</a></li>
 						</ul>
 						<ul class="nav navbar-nav navbar-right">
@@ -135,9 +135,9 @@
 										<input name="b_36c4fd991d266f23781ded980_aefe40901a" tabindex="-1" value="" type="text">
 									</div>
 
-									<!-- <div class="col-lg-4 col-md-4">
+									 <div class="col-lg-4 col-md-4">
 												<button class="bb-btn btn"><span class="lnr lnr-arrow-right"></span></button>
-											</div>  -->
+											</div>  
 								</div>
 								<div class="info"></div>
 							</form>
