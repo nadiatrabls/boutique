@@ -43,7 +43,7 @@
 			<nav class="navbar navbar-expand-lg navbar-light main_box">
 				<div class="container">
 					<!-- Brand and toggle get grouped for better mobile display -->
-					<a class="navbar-brand logo_h" href="index.html"><img src="img/logo11.png" alt="" class="lg"></a>
+					<a class="navbar-brand logo_h" href="/"><img src="img/logo11.png" alt="" class="lg"></a>
 					<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
 					 aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
 						<span class="icon-bar"></span>
@@ -54,35 +54,34 @@
 					<div class="collapse navbar-collapse offset" id="navbarSupportedContent">
 						<ul class="nav navbar-nav menu_nav ml-auto">
 							<li class="nav-item active"><a class="nav-link" href="/">Accueil</a></li>
-							<li class="nav-item active"><a class="nav-link" href="/produits">Boutique</a></li> 
+							
 							<li class="nav-item submenu dropdown">
 								<a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"
 								 aria-expanded="false">Boutique</a>
 								<ul class="dropdown-menu">
-									<li class="nav-item"><a class="nav-link" href="category.html">Catégories des produits</a></li>
-									<li class="nav-item"><a class="nav-link" href="single-product.html">Details des produits</a></li>
-									<li class="nav-item"><a class="nav-link" href="checkout.html">Liste des favoris</a></li>
-									 <li class="nav-item"><a class="nav-link" href="cart.html">Shopping Cart</a></li>
-									<li class="nav-item"><a class="nav-link" href="confirmation.html">Confirmation</a></li> 
+								<li class="nav-item"><a class="nav-link" href="/produits">Shop</a></li>
+									<li class="nav-item"><a class="nav-link" href="/categorie">Catégories des produits</a></li>
+									<li class="nav-item"><a class="nav-link" href="/single-product">Details des produits</a></li>
+									<li class="nav-item"><a class="nav-link" href="/checkout">Liste des favoris</a></li>
+									 <li class="nav-item"><a class="nav-link" href="/cart">Shopping Cart</a></li>
+									<li class="nav-item"><a class="nav-link" href="/confirmation">Confirmation</a></li> 
 								</ul>
 							</li>
-							<li class="nav-item active"><a class="nav-link" href="/">Blog</a></li>
+							<li class="nav-item active"><a class="nav-link" href="/blog">Blog</a></li>
 							 <li class="nav-item submenu dropdown">
 								<a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"
 								 aria-expanded="false">Pages</a>
 								<ul class="dropdown-menu">
-									<li class="nav-item"><a class="nav-link" href="login.html">Login</a></li>
-									<li class="nav-item"><a class="nav-link" href="tracking.html">Tracking</a></li>
-									<li class="nav-item"><a class="nav-link" href="elements.html">Elements</a></li>
+									<li class="nav-item"><a class="nav-link" href="/login">Login</a></li>
+									<li class="nav-item"><a class="nav-link" href="/tracking">Tracking</a></li>
+									<li class="nav-item"><a class="nav-link" href="/elements">Elements</a></li>
 								</ul>
 							</li> 
-							<li class="nav-item"><a class="nav-link" href="contact.html">Contact</a></li>
+							<li class="nav-item"><a class="nav-link" href="/contact">Contact</a></li>
 						</ul>
 						<ul class="nav navbar-nav navbar-right">
 							<li class="nav-item"><a href="#" class="cart"><span class="ti-bag"></span></a></li>
-							<li class="nav-item">
-								<button class="search"><span class="lnr lnr-magnifier" id="search"></span></button>
-							</li>
+							
 						</ul>
 					</div>
 				</div>
@@ -197,6 +196,66 @@ Copyright &copy;<script>document.write(new Date().getFullYear());</script> All r
 	<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCjCGmQ0Uq4exrzdcL6rvxywDDOvfAu6eE"></script>
 	<script src="js/gmaps.min.js"></script>
 	<script src="js/main.js"></script>
+	<script>
+   $(document).ready(function() {
+    // Ajouter au panier
+    $('.add-to-cart').on('click', function(e) {
+        e.preventDefault();
+        var produitId = $(this).data('id');
+
+        $.ajax({
+            type: 'POST',
+            url: 'index.php?url=ajouter-au-panier',
+            data: { produit_id: produitId },
+            dataType: 'json',
+            success: function(response) {
+                if (response.status === 'success') {
+                    alert(response.message);
+                } else {
+                    alert('Erreur: ' + response.message);
+                }
+            },
+            error: function(xhr, status, error) {
+                console.log(xhr.responseText); // Voir l'erreur dans la console
+                alert('Erreur lors de l\'ajout au panier.');
+            }
+        });
+    });
+        
+    });
+</script>
+<script>
+	$(document).ready(function() {
+    // Ajouter aux favoris
+    $('.add-to-favorite').on('click', function(e) {
+        e.preventDefault();
+        var produitId = $(this).data('id');
+
+        $.ajax({
+            type: 'POST',
+            url: 'index.php?url=ajouter-aux-favoris',
+            data: { produit_id: produitId },
+            dataType: 'json',
+            success: function(response) {
+                if (response.status === 'success') {
+                    alert(response.message);
+                } else if (response.status === 'info') {
+                    alert(response.message);
+                } else {
+                    alert('Erreur: ' + response.message);
+                }
+            },
+            error: function(xhr, status, error) {
+                console.log(xhr.responseText); // Voir l'erreur dans la console
+                alert('Erreur lors de l\'ajout aux favoris.');
+            }
+        });
+    });
+});
+
+</script>
+
+
 </body>
 
 </html>
