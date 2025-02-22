@@ -22,75 +22,84 @@
             <div class="sidebar-categories">
                 <div class="head">Browse Categories</div>
                 <ul class="main-categories">
-                    <?php foreach($categories as $categorie): ?>
-                        <li class="main-nav-list">
-                            <a data-toggle="collapse" href="#categorie-<?php echo $categorie->id; ?>" aria-expanded="false" aria-controls="categorie-<?php echo $categorie->id; ?>">
-                                <span class="lnr lnr-arrow-right"></span><?php echo $categorie->nom; ?>
+    <?php foreach($categories as $categorie): ?>
+        <li class="main-nav-list">
+            <a data-toggle="collapse" href="#categorie-<?php echo $categorie->id; ?>" aria-expanded="false" aria-controls="categorie-<?php echo $categorie->id; ?>">
+                <span class="lnr lnr-arrow-right"></span>
+                <?php echo $categorie->nom; ?> 
+                <span>(<?php echo $categorie->nombre_produits; ?>)</span>
+            </a>
+            <ul class="collapse" id="categorie-<?php echo $categorie->id; ?>">
+                <?php foreach($sousCategories as $sousCategorie): ?>
+                    <?php if($sousCategorie->categorie_id == $categorie->id): ?>
+                        <li class="main-nav-list child">
+                            <a href="index.php?url=produits&categorie=<?php echo $categorie->id; ?>&sous-categorie=<?php echo $sousCategorie->id; ?>">
+                                <?php echo $sousCategorie->nom; ?> 
+                                <span>(<?php echo $sousCategorie->nombre_produits; ?>)</span>
                             </a>
-                            <ul class="collapse" id="categorie-<?php echo $categorie->id; ?>">
-                                <?php foreach($sousCategories as $sousCategorie): ?>
-                                    <?php if($sousCategorie->categorie_id == $categorie->id): ?>
-                                        <li class="main-nav-list child">
-                                            <a href="produits.php?sous-categorie=<?php echo $sousCategorie->id; ?>">
-                                                <?php echo $sousCategorie->nom; ?>
-                                            </a>
-                                        </li>
-                                    <?php endif; ?>
-                                <?php endforeach; ?>
-                            </ul>
                         </li>
-                    <?php endforeach; ?>
-                </ul>
+                    <?php endif; ?>
+                <?php endforeach; ?>
+            </ul>
+        </li>
+    <?php endforeach; ?>
+</ul>
+
+
+                      
             </div>
             <!-- Filtres Produits -->
             <div class="sidebar-filter mt-50">
                 <div class="top-filter-head">Product Filters</div>
 				<div class="common-filter">
     <div class="head">Pierres</div>
-    <form action="#" method="GET">
-        <ul>
-            <?php if (!empty($pierres) && is_array($pierres)): ?>
-                <?php foreach($pierres as $pierre): ?>
-                    <li class="filter-list">
-                        <input class="pixel-radio" type="radio" id="pierre-<?php echo strtolower(str_replace(' ', '-', htmlspecialchars($pierre->nom, ENT_QUOTES, 'UTF-8'))); ?>" name="pierre" value="<?php echo htmlspecialchars($pierre->nom, ENT_QUOTES, 'UTF-8'); ?>">
-                        <label for="pierre-<?php echo strtolower(str_replace(' ', '-', htmlspecialchars($pierre->nom, ENT_QUOTES, 'UTF-8'))); ?>">
-                            <?php echo ucfirst(htmlspecialchars($pierre->nom, ENT_QUOTES, 'UTF-8')); ?> <span>(<?php echo intval($pierre->count); ?>)</span>
-                        </label>
-                    </li>
-                <?php endforeach; ?>
-            <?php else: ?>
-                <p>Aucune pierre trouvée.</p>
-            <?php endif; ?>
-        </ul>
-    </form>
+    <form action="index.php" method="GET">
+    <input type="hidden" name="url" value="produits">
+    <ul>
+        <?php foreach($pierres as $pierre): ?>
+            <li class="filter-list">
+                <input class="pixel-radio" type="radio" 
+                    id="pierre-<?php echo strtolower($pierre->nom); ?>" 
+                    name="pierre" 
+                    value="<?php echo $pierre->nom; ?>"
+                    onchange="this.form.submit()"
+                    <?php echo (isset($_GET['pierre']) && $_GET['pierre'] == $pierre->nom) ? 'checked' : ''; ?>>
+                <label for="pierre-<?php echo strtolower($pierre->nom); ?>">
+                    <?php echo ucfirst($pierre->nom); ?> <span>(<?php echo $pierre->count; ?>)</span>
+                </label>
+            </li>
+        <?php endforeach; ?>
+    </ul>
+</form>
+
 
 
                         
-                    </form>
+                    
                 </div>
                 <div class="common-filter">
                     <div class="head">Color</div>
-                    <form action="#" method="GET">
-                        <ul>
-                            <?php foreach($couleurs as $couleur): ?>
-                                <li class="filter-list">
-    <input class="pixel-radio" type="radio" id="color-<?php echo $couleur->nom; ?>">
-    <label for="color-<?php echo $couleur->nom; ?>">
-        <?php echo $couleur->nom; ?> <span>(<?php echo $couleur->count; ?>)</span>
-    </label>
-</li>
-                            <?php endforeach; ?>
-                        </ul>
-                    </form>
+                    <form action="index.php" method="GET">
+    <input type="hidden" name="url" value="produits">
+    <ul>
+        <?php foreach($couleurs as $couleur): ?>
+            <li class="filter-list">
+                <input class="pixel-radio" type="radio" 
+                    id="couleur-<?php echo strtolower($couleur->nom); ?>" 
+                    name="couleur" 
+                    value="<?php echo $couleur->nom; ?>"
+                    onchange="this.form.submit()"
+                    <?php echo (isset($_GET['couleur']) && $_GET['couleur'] == $couleur->nom) ? 'checked' : ''; ?>>
+                <label for="couleur-<?php echo strtolower($couleur->nom); ?>">
+                    <?php echo ucfirst($couleur->nom); ?> <span>(<?php echo $couleur->count; ?>)</span>
+                </label>
+            </li>
+        <?php endforeach; ?>
+    </ul>
+</form>
+
                 </div>
-                <div class="common-filter">
-                    <div class="head">Price</div>
-                    <form action="#" method="GET">
-                        <input type="range" min="1" max="50" step="1" name="price" value="<?php echo isset($_GET['price']) ? $_GET['price'] : 50; ?>">
-                        <span>1€ - 50€</span>
-                        <button type="submit" class="btn btn-primary btn-sm mt-2">Filter</button>
-                    </form>
-                </div>
+                
             </div>
         </div>
         <div class="col-xl-9 col-lg-8 col-md-7">
@@ -144,23 +153,21 @@
                 <h6 class="l-through"><?php echo number_format($produit->prix * 1.2, 2); ?>€</h6>
             </div>
             <div class="prd-bottom">
-                <a href="#" class="social-info">
-                    <span class="ti-bag"></span>
-                    <p class="hover-text">add to bag</p>
-                </a>
-                <a href="#" class="social-info">
-                    <span class="lnr lnr-heart"></span>
-                    <p class="hover-text">Wishlist</p>
-                </a>
-                <a href="#" class="social-info">
-                    <span class="lnr lnr-sync"></span>
-                    <p class="hover-text">compare</p>
-                </a>
-                <a href="#" class="social-info">
-                    <span class="lnr lnr-move"></span>
-                    <p class="hover-text">view more</p>
-                </a>
-            </div>
+    <a href="#" class="social-info add-to-cart" data-id="<?php echo $produit->id; ?>">
+        <span class="ti-bag"></span>
+        <p class="hover-text">add to bag</p>
+    </a>
+    <a href="#" class="social-info add-to-favorites" data-id="<?php echo $produit->id; ?>">
+        <span class="lnr lnr-heart"></span>
+        <p class="hover-text">Wishlist</p>
+    </a>
+    
+    <a href="index.php?url=single-product&id=<?= $produit->id; ?>" class="social-info">
+        <span class="lnr lnr-move"></span>
+        <p class="hover-text">Voir plus</p>
+    </a>
+</div>
+
         </div>
     </div>
 </div>
@@ -312,4 +319,3 @@
 }
 
 </style>
-

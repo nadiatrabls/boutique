@@ -21,44 +21,97 @@ class ProduitsModel extends Database
             SELECT p.id, p.nom, p.description, p.prix, p.image, 
                    c.nom AS categorie_nom, sc.nom AS sous_categorie_nom
             FROM produits p
-            LEFT JOIN categories c ON p.categorie_id = c.id
             LEFT JOIN sous_categories sc ON p.sous_categorie_id = sc.id
+            LEFT JOIN categories c ON sc.categorie_id = c.id
         ")->fetchAll(PDO::FETCH_OBJ);
     }
 
-    // ✅ Récupérer les produits par catégorie
-    public function produitsParCategorie($categorie_id)
+    // ✅ Récupérer les produits par Catégorie
+    public function getProduitsParCategorie($categorieId)
     {
-        return $this->db->requete("
-            SELECT * FROM produits WHERE categorie_id = :categorie_id
-        ", ['categorie_id' => $categorie_id])->fetchAll(PDO::FETCH_OBJ);
-    }
-
-    // ✅ Récupérer les produits d'une sous-catégorie
-    public function produitsParSousCategorie($sous_categorie_id)
-    {
-        return $this->db->requete("
-            SELECT * FROM produits WHERE sous_categorie_id = :sous_categorie_id
-        ", ['sous_categorie_id' => $sous_categorie_id])->fetchAll(PDO::FETCH_OBJ);
-    }
-
-    // ✅ Récupérer les derniers produits
-    public function getDerniersProduits($limit = 8)
-    {
-        $limit = intval($limit); // ✅ Assurer que LIMIT est bien un entier
-        $sql = "SELECT * FROM produits ORDER BY id DESC LIMIT $limit";
-        return $this->db->requete($sql)->fetchAll(PDO::FETCH_OBJ);
-    }
-
-    // ✅ Récupérer un produit par ID
-    public function getProduitById($id)
-    {
-        return $this->db->requete("
-            SELECT p.*, c.nom AS categorie_nom 
+        $sql = "
+            SELECT p.*, c.nom AS categorie_nom, sc.nom AS sous_categorie_nom
             FROM produits p
-            LEFT JOIN categories c ON p.categorie_id = c.id
-            WHERE p.id = ?
-        ", [$id])->fetch(PDO::FETCH_OBJ);
+            LEFT JOIN sous_categories sc ON p.sous_categorie_id = sc.id
+            LEFT JOIN categories c ON sc.categorie_id = c.id
+            WHERE c.id = :categorie_id
+        ";
+        
+        $params = [':categorie_id' => $categorieId];
+        
+        $query = $this->db->getPdo()->prepare($sql);
+        $query->execute($params);
+        
+        return $query->fetchAll(PDO::FETCH_OBJ);
+    }
+
+    // ✅ Récupérer les produits par Sous-Catégorie
+    public function getProduitsParSousCategorie($sousCategorieId)
+    {
+        $sql = "
+            SELECT p.*, c.nom AS categorie_nom, sc.nom AS sous_categorie_nom
+            FROM produits p
+            LEFT JOIN sous_categories sc ON p.sous_categorie_id = sc.id
+            LEFT JOIN categories c ON sc.categorie_id = c.id
+            WHERE sc.id = :sous_categorie_id
+        ";
+        
+        $params = [':sous_categorie_id' => $sousCategorieId];
+        
+        $query = $this->db->getPdo()->prepare($sql);
+        $query->execute($params);
+        
+        return $query->fetchAll(PDO::FETCH_OBJ);
+    }
+
+    // ✅ Récupérer les produits par Catégorie ET Sous-Catégorie
+    // ✅ Récupérer les produits par Catégorie ET Sous-Catégorie
+public function getProduitsParCategorieEtSousCategorie($categorieId, $sousCategorieId = null)
+{
+    // 🔥 Correction : Utilisation des jointures pour lier correctement les catégories et sous-catégories
+    $sql = "SELECT p.*, c.nom AS categorie_nom, sc.nom AS sous_categorie_nom
+            FROM produits p
+            LEFT JOIN sous_categories sc ON p.sous_categorie_id = sc.id
+            LEFT JOIN categories c ON sc.categorie_id = c.id
+            WHERE c.id = :categorie_id";
+    
+    // 🔥 Correction : Filtrage strict des catégories et sous-catégories
+    if ($sousCategorieId) {
+        $sql .= " AND sc.id = :sous_categorie_id";
+    }
+
+    $params = [':categorie_id' => $categorieId];
+    if ($sousCategorieId) {
+        $params[':sous_categorie_id'] = $sousCategorieId;
+    }
+
+    $req = $this->requete($sql, $params);
+    return $req->fetchAll(PDO::FETCH_OBJ);
+}
+
+    // ✅ Récupérer les produits par Pierre
+    public function getProduitsParPierre($pierre)
+    {
+        return $this->db->requete("
+            SELECT * FROM produits WHERE pierre = :pierre
+        ", ['pierre' => $pierre])->fetchAll(PDO::FETCH_OBJ);
+    }
+
+    // ✅ Récupérer les produits par Couleur
+    public function getProduitsParCouleur($couleur)
+    {
+        return $this->db->requete("
+            SELECT * FROM produits WHERE couleur = :couleur
+        ", ['couleur' => $couleur])->fetchAll(PDO::FETCH_OBJ);
+    }
+
+    // ✅ Récupérer les produits exclusifs
+    public function getProduitsExclusifs($limit = 3)
+    {
+        $limit = intval($limit);
+        return $this->db->requete("
+            SELECT * FROM produits WHERE exclusif = 1 ORDER BY RAND() LIMIT $limit
+        ")->fetchAll(PDO::FETCH_OBJ);
     }
 
     // ✅ Récupérer les autres produits (excluant un ID spécifique)
@@ -75,38 +128,55 @@ class ProduitsModel extends Database
             ")->fetchAll(PDO::FETCH_OBJ);
         }
     }
-
-    // ✅ Récupérer les produits exclusifs (⚠️ Vérifier si la colonne `exclusif` existe)
-    public function getProduitsExclusifs($limit = 3)
+    /**
+     * Récupère les produits avec pagination
+     *
+     * @param int $limite  Nombre de produits à afficher par page
+     * @param int $offset  Offset pour la pagination
+     * @return array
+     */
+     /**
+     * Récupère les produits avec pagination
+     */
+    public function getProduitsPagines($limite, $offset)
     {
-        $limit = intval($limit);
-        return $this->db->requete("
-            SELECT * FROM produits ORDER BY RAND() LIMIT $limit
-        ")->fetchAll(PDO::FETCH_OBJ);
+        // 🚀 Utilisation directe de LIMIT et OFFSET
+        $sql = "SELECT * FROM produits LIMIT $limite OFFSET $offset";
+        $stmt = $this->getPdo()->query($sql);
+        return $stmt->fetchAll();
     }
 
-    // ✅ Compter le nombre de produits par catégorie
-    public function countProduitsParCategorie($categorie_id)
+    /**
+     * Compte le nombre total de produits
+     */
+    public function countProduits()
     {
-        return $this->db->requete("
-            SELECT COUNT(*) as total FROM produits WHERE categorie_id = ?
-        ", [$categorie_id])->fetchColumn();
+        $sql = "SELECT COUNT(*) as total FROM produits";
+        $stmt = $this->getPdo()->query($sql);
+        $result = $stmt->fetch();
+        return $result->total;
     }
 
-    // ✅ Compter le nombre de produits par sous-catégorie
-    public function countProduitsParSousCategorie($sous_categorie_id)
+    /**
+     * Récupère le nombre total de produits
+     *
+     * @return int
+     */
+    public function getNombreTotalProduits()
     {
-        return $this->db->requete("
-            SELECT COUNT(*) as total FROM produits WHERE sous_categorie_id = ?
-        ", [$sous_categorie_id])->fetchColumn();
+        $sql = "SELECT COUNT(*) as total FROM produits";
+        $stmt = $this->requete($sql);
+        $result = $stmt->fetch();
+        return $result->total ?? 0;
     }
-
     // ✅ Récupérer toutes les catégories
     public function toutesLesCategories()
     {
         return $this->db->requete("
             SELECT c.*, 
-                (SELECT COUNT(*) FROM produits p WHERE p.categorie_id = c.id) AS nombre_produits 
+                (SELECT COUNT(*) FROM produits p 
+                 LEFT JOIN sous_categories sc ON p.sous_categorie_id = sc.id 
+                 WHERE sc.categorie_id = c.id) AS nombre_produits 
             FROM categories c
         ")->fetchAll(PDO::FETCH_OBJ);
     }
@@ -116,7 +186,8 @@ class ProduitsModel extends Database
     {
         return $this->db->requete("
             SELECT sc.*, 
-                (SELECT COUNT(*) FROM produits p WHERE p.sous_categorie_id = sc.id) AS nombre_produits 
+                (SELECT COUNT(*) FROM produits p 
+                 WHERE p.sous_categorie_id = sc.id) AS nombre_produits 
             FROM sous_categories sc
         ")->fetchAll(PDO::FETCH_OBJ);
     }
@@ -136,16 +207,114 @@ class ProduitsModel extends Database
     public function toutesLesCouleurs()
     {
         return $this->db->requete("
-            SELECT DISTINCT couleur AS nom, COUNT(*) AS count 
+            SELECT couleur AS nom, COUNT(*) AS count 
             FROM produits 
+            WHERE couleur IS NOT NULL AND couleur != ''
             GROUP BY couleur
         ")->fetchAll(PDO::FETCH_OBJ);
     }
-    public function getCategorieNom($categorie_id)
+
+   
+
+    // ✅ Récupérer les derniers produits (par défaut, les 8 derniers)
+public function getDerniersProduits($limit = 8)
+{
+    $limit = intval($limit); // Sécurisation de la limite
+    $sql = "
+        SELECT p.id, p.nom, p.description, p.prix, p.image, 
+               c.nom AS categorie_nom, sc.nom AS sous_categorie_nom
+        FROM produits p
+        LEFT JOIN sous_categories sc ON p.sous_categorie_id = sc.id
+        LEFT JOIN categories c ON sc.categorie_id = c.id
+        ORDER BY p.date_creation DESC 
+        LIMIT $limit
+    ";
+
+    return $this->db->requete($sql)->fetchAll(PDO::FETCH_OBJ);
+}
+// ✅ Récupérer les produits par catégorie
+public function produitsParCategorie($categorieId)
+{
+    $sql = "
+        SELECT p.id, p.nom, p.description, p.prix, p.image, 
+               c.nom AS categorie_nom, sc.nom AS sous_categorie_nom
+        FROM produits p
+        LEFT JOIN sous_categories sc ON p.sous_categorie_id = sc.id
+        LEFT JOIN categories c ON sc.categorie_id = c.id
+        WHERE c.id = :categorie_id
+    ";
+
+    $query = $this->db->getPdo()->prepare($sql);
+    $query->bindValue(':categorie_id', $categorieId, PDO::PARAM_INT);
+    $query->execute();
+
+    return $query->fetchAll(PDO::FETCH_OBJ);
+}
+// ✅ Récupérer le nom de la catégorie par son ID
+public function getCategorieNom($categorieId)
 {
     $sql = "SELECT nom FROM categories WHERE id = :id";
-    $result = $this->db->requete($sql, ['id' => $categorie_id])->fetch(PDO::FETCH_OBJ);
+    $query = $this->db->getPdo()->prepare($sql);
+    $query->bindValue(':id', $categorieId, PDO::PARAM_INT);
+    $query->execute();
+    
+    $result = $query->fetch(PDO::FETCH_OBJ);
     return $result ? $result->nom : "Catégorie inconnue";
 }
+// ✅ Récupérer un produit par ID
+public function getProduitById($id)
+{
+    $sql = "
+        SELECT p.*, 
+               c.nom AS categorie_nom, 
+               sc.nom AS sous_categorie_nom
+        FROM produits p
+        LEFT JOIN sous_categories sc ON p.sous_categorie_id = sc.id
+        LEFT JOIN categories c ON sc.categorie_id = c.id
+        WHERE p.id = :id
+    ";
+    
+    $query = $this->db->getPdo()->prepare($sql);
+    $query->bindValue(':id', $id, PDO::PARAM_INT);
+    $query->execute();
+    
+    return $query->fetch(PDO::FETCH_OBJ);
+}
+// ✅ Compter le nombre de produits par catégorie
+// ✅ Compter le nombre de produits par catégorie
+public function countProduitsParCategorie($categorie_id)
+{
+    $sql = "
+        SELECT COUNT(*) as total 
+        FROM produits p
+        LEFT JOIN sous_categories sc ON p.sous_categorie_id = sc.id
+        LEFT JOIN categories c ON sc.categorie_id = c.id
+        WHERE c.id = :categorie_id
+    ";
+
+    $query = $this->db->getPdo()->prepare($sql);
+    $query->bindValue(':categorie_id', $categorie_id, PDO::PARAM_INT);
+    $query->execute();
+
+    return $query->fetchColumn();
+}
+
+// ✅ Compter le nombre de produits par sous-catégorie
+// ✅ Compter le nombre de produits par sous-catégorie
+public function countProduitsParSousCategorie($sous_categorie_id)
+{
+    $sql = "
+        SELECT COUNT(*) as total 
+        FROM produits p
+        WHERE p.sous_categorie_id = :sous_categorie_id
+    ";
+
+    $query = $this->db->getPdo()->prepare($sql);
+    $query->bindValue(':sous_categorie_id', $sous_categorie_id, PDO::PARAM_INT);
+    $query->execute();
+
+    return $query->fetchColumn();
+}
+
 
 }

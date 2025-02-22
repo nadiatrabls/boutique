@@ -3,14 +3,16 @@
 require '../vendor/autoload.php';
 
 use Boutique\Controllers\AccueilController;
+use Boutique\Controllers\BlogController;
 use Boutique\Controllers\ProduitsController;
 use Boutique\Controllers\UserController;
 use Boutique\Controllers\CartController;
 use Boutique\Controllers\OrderController;
-use Boutique\Controllers\BlogController;
+
 use Boutique\Controllers\ContactController;
 use Boutique\Controllers\SingleProductController;
 use Boutique\Controllers\CategorieController;
+use Boutique\Controllers\TrackingController;
 
 // Démarrage de la session pour gérer le panier et les favoris
 session_start();
@@ -37,43 +39,152 @@ if ($url === 'produits') {
     $ctrl->details($id); // Affichage des détails du produit
     exit;
 }
-
-// Routes pour l'utilisateur
+// Route pour afficher le formulaire de connexion
 elseif ($url === 'login') {
-    $ctrl = new UserController;
+    $ctrl = new UserController();
     $ctrl->index();
     exit;
 }
 
-// Routes pour le panier
- elseif ($url == 'ajouter-au-panier') {
-    $ctrl = new CartController;
-    $ctrl->ajouterAuPanier(); // Appel à la méthode d'ajout au panier
+
+
+// Route pour afficher le formulaire d'inscription
+elseif ($url === 'register') {
+    $ctrl = new UserController();
+    $ctrl->register();
     exit;
 }
 
 
+
+// Route pour la déconnexion
+elseif ($url === 'logout') {
+    $ctrl = new UserController();
+    $ctrl->logout();
+    exit;
+}
+
+
+// Route pour l'inscription
+ elseif ($url == 'register') {
+    $ctrl = new UserController;
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        $ctrl->inscription(); // 🔥 Appel à la méthode d'inscription
+    } else {
+        $ctrl->register(); // 🔥 Affichage de la page d'inscription
+    }
+    exit;
+}
+
+// Routes pour l'utilisateur
+ elseif ($url == 'login') {
+    $ctrl = new UserController;
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        $ctrl->login(); // 🔥 Appel à la méthode login()
+    } else {
+        $ctrl->index(); // 🔥 Affichage de la page de connexion
+    }
+    exit;
+}
+
+
+// Routes pour le panier
+elseif ($url == 'cart') {
+    $ctrl = new CartController;
+    $ctrl->index();
+    exit;
+} elseif ($url == 'ajouter-au-panier') {
+    $ctrl = new CartController;
+    $ctrl->ajouterAuPanier();
+    exit;
+} elseif ($url == 'update-quantity') {
+    $ctrl = new CartController;
+    $ctrl->updateQuantity();
+    exit;
+} elseif ($url == 'supprimer-du-panier') {
+    $ctrl = new CartController;
+    $ctrl->supprimerDuPanier();
+    exit;
+}
+
 // Routes pour les favoris
- elseif ($url == 'ajouter-aux-favoris') {
+// Ajouter un produit aux favoris
+elseif ($url == 'ajouter-aux-favoris') {
     $ctrl = new ProduitsController;
     $ctrl->ajouterAuxFavoris();
     exit;
 }
 
+// Affichage des favoris
+elseif ($url == 'wishlist') {
+    $ctrl = new ProduitsController;
+    $ctrl->afficherFavoris();
+    exit;
+}
+
+// Suppression d'un produit des favoris
+elseif ($url == 'supprimer-des-favoris') {
+    $ctrl = new ProduitsController;
+    $ctrl->supprimerDesFavoris();
+    exit;
+}
+elseif ($url === 'tracking') {
+    $ctrl = new TrackingController;
+    $ctrl->index();
+    exit;
+}
+
 
 // Routes pour la commande
-elseif ($url === 'checkout' || $url === 'confirmation' || $url === 'tracking') {
+// Route pour afficher la page de Checkout
+elseif ($url === 'checkout') {
     $ctrl = new OrderController;
     $ctrl->index();
     exit;
 }
 
-// Routes pour le blog
-elseif ($url === 'blog' || $url === 'single-blog') {
-    $ctrl = new BlogController;
+// Route pour valider la commande
+elseif ($url === 'valider-commande') {
+    $ctrl = new OrderController;
+    $ctrl->validerCommande();
+    exit;
+}
+
+// Route pour afficher la page de confirmation
+// public/index.php
+
+
+
+
+// Page principale du blog
+// Route principale du blog (affiche tous les produits)
+// Route pour afficher la liste des articles (produits)
+elseif ($url === 'blog') {
+    $ctrl = new BlogController();
     $ctrl->index();
     exit;
 }
+
+// Route pour afficher le détail d'un article (produit)
+elseif ($url === 'single-blog') {
+    $ctrl = new BlogController();
+    $ctrl->details($_GET['id']);
+    exit;
+}
+
+
+// Route pour filtrer les produits par catégorie dans le blog
+// Route pour filtrer les produits par catégorie
+elseif ($url === 'blog-categorie') {
+    $ctrl = new BlogController();
+    $ctrl->filtreParCategorie($_GET['id']);
+    exit;
+}
+
+
+
+
+
 
 // Routes pour la page de contact
 elseif ($url === 'contact') {
@@ -87,4 +198,5 @@ else {
     $ctrl = new AccueilController;
     $ctrl->index();
     exit;
-}
+} 
+

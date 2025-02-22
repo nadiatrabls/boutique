@@ -53,34 +53,39 @@
 					<!-- Collect the nav links, forms, and other content for toggling -->
 					<div class="collapse navbar-collapse offset" id="navbarSupportedContent">
 						<ul class="nav navbar-nav menu_nav ml-auto">
-							<li class="nav-item active"><a class="nav-link" href="/">Accueil</a></li>
+							<li class="nav-item active"><a class="nav-link" href="/">Home</a></li>
 							
 							<li class="nav-item submenu dropdown">
 								<a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"
-								 aria-expanded="false">Boutique</a>
+								 aria-expanded="false">Shop</a>
 								<ul class="dropdown-menu">
 								<li class="nav-item"><a class="nav-link" href="/produits">Shop</a></li>
 									<li class="nav-item"><a class="nav-link" href="/categorie">Catégories des produits</a></li>
 									<li class="nav-item"><a class="nav-link" href="/single-product">Details des produits</a></li>
-									<li class="nav-item"><a class="nav-link" href="/checkout">Liste des favoris</a></li>
-									 <li class="nav-item"><a class="nav-link" href="/cart">Shopping Cart</a></li>
-									<li class="nav-item"><a class="nav-link" href="/confirmation">Confirmation</a></li> 
+									<li class="nav-item"><a class="nav-link" href="/wishlist">Liste des favoris</a></li>
+									
+									
 								</ul>
 							</li>
-							<li class="nav-item active"><a class="nav-link" href="/blog">Blog</a></li>
+							
+									<li class="nav-item"><a class="nav-link" href="/blog">blog</a></li>
+									
+							</li> 
 							 <li class="nav-item submenu dropdown">
 								<a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"
 								 aria-expanded="false">Pages</a>
 								<ul class="dropdown-menu">
 									<li class="nav-item"><a class="nav-link" href="/login">Login</a></li>
 									<li class="nav-item"><a class="nav-link" href="/tracking">Tracking</a></li>
-									<li class="nav-item"><a class="nav-link" href="/elements">Elements</a></li>
+									
+									
+									
 								</ul>
 							</li> 
 							<li class="nav-item"><a class="nav-link" href="/contact">Contact</a></li>
 						</ul>
 						<ul class="nav navbar-nav navbar-right">
-							<li class="nav-item"><a href="#" class="cart"><span class="ti-bag"></span></a></li>
+							<li class="nav-item"><a href="/cart" class="cart"><span class="ti-bag"></span></a></li>
 							
 						</ul>
 					</div>
@@ -107,10 +112,9 @@
 			<div class="row">
 				<div class="col-lg-3  col-md-6 col-sm-6">
 					<div class="single-footer-widget">
-						<h6>About Us</h6>
+						<h6>Estelle Mercier</h6>
 						<p>
-							Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore dolore
-							magna aliqua.
+						chaque bijou est une création unique alliant artisanat et bienfaits des pierres naturelles. Nos bijoux sont fabriqués avec des matériaux de qualité supérieure, soigneusement sélectionnés pour leurs vertus énergétiques et thérapeutiques.
 						</p>
 					</div>
 				</div>
@@ -225,7 +229,7 @@ Copyright &copy;<script>document.write(new Date().getFullYear());</script> All r
     });
 </script>
 <script>
-	$(document).ready(function() {
+$(document).ready(function() {
     // Ajouter aux favoris
     $('.add-to-favorite').on('click', function(e) {
         e.preventDefault();
@@ -237,24 +241,45 @@ Copyright &copy;<script>document.write(new Date().getFullYear());</script> All r
             data: { produit_id: produitId },
             dataType: 'json',
             success: function(response) {
-                if (response.status === 'success') {
-                    alert(response.message);
-                } else if (response.status === 'info') {
+                // Vérifie si le message est défini
+                if (response.message) {
                     alert(response.message);
                 } else {
-                    alert('Erreur: ' + response.message);
+                    alert('Action réalisée avec succès.');
                 }
             },
             error: function(xhr, status, error) {
                 console.log(xhr.responseText); // Voir l'erreur dans la console
-                alert('Erreur lors de l\'ajout aux favoris.');
+                alert('produit déjà dans le favoris');
             }
         });
     });
 });
-
 </script>
 
+<script>
+	// 🔥 Ajouter aux favoris
+	$(document).on('click', '.add-to-favorites', function(e) {
+            e.preventDefault();
+            var produitId = $(this).data('id');
+            
+            $.ajax({
+                url: 'index.php?url=ajouter-aux-favoris',
+                type: 'POST',
+                data: {
+                    produit_id: produitId
+                },
+                success: function(response) {
+                    alert('Produit ajouté aux favoris.');
+                    location.reload();
+                },
+                error: function() {
+                    alert('Erreur lors de l\'ajout aux favoris.');
+                }
+            });
+        });
+    
+</script>
 
 </body>
 

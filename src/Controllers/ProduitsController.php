@@ -5,6 +5,9 @@ use Boutique\Models\ProduitsModel;
 
 class ProduitsController extends Controller
 {
+    /**
+     * ✅ Affichage des produits avec filtres et sous-catégories
+     */
     public function index()
     {
         $produitsModel = new ProduitsModel();
@@ -24,12 +27,30 @@ class ProduitsController extends Controller
             $sousCategorie->nombre_produits = $produitsModel->countProduitsParSousCategorie($sousCategorie->id);
         }
 
-        // ✅ Vérifier si une catégorie ou une sous-catégorie est sélectionnée
-        if (isset($_GET['categorie'])) {
-            $touslesproduits = $produitsModel->produitsParCategorie($_GET['categorie']);
-        } elseif (isset($_GET['sous-categorie'])) {
-            $touslesproduits = $produitsModel->produitsParSousCategorie($_GET['sous-categorie']);
+        // 🔥 Gestion des filtres et des sous-catégories
+        $categorie = isset($_GET['categorie']) ? intval($_GET['categorie']) : null;
+        $sousCategorie = isset($_GET['sous-categorie']) ? intval($_GET['sous-categorie']) : null;
+        $pierre = isset($_GET['pierre']) ? $_GET['pierre'] : null;
+        $couleur = isset($_GET['couleur']) ? $_GET['couleur'] : null;
+
+        // 🔍 Appliquer les filtres dynamiques
+        if ($categorie && $sousCategorie) {
+            // 🟢 Cas 1 : Catégorie et Sous-catégorie sélectionnées
+            $touslesproduits = $produitsModel->getProduitsParCategorieEtSousCategorie($categorie, $sousCategorie);
+        } elseif ($categorie) {
+            // 🟡 Cas 2 : Seulement Catégorie sélectionnée
+            $touslesproduits = $produitsModel->getProduitsParCategorie($categorie);
+        } elseif ($sousCategorie) {
+            // 🔵 Cas 3 : Seulement Sous-catégorie sélectionnée
+            $touslesproduits = $produitsModel->getProduitsParSousCategorie($sousCategorie);
+        } elseif ($pierre) {
+            // 🔵 Cas 4 : Filtre par Pierre
+            $touslesproduits = $produitsModel->getProduitsParPierre($pierre);
+        } elseif ($couleur) {
+            // 🔴 Cas 5 : Filtre par Couleur
+            $touslesproduits = $produitsModel->getProduitsParCouleur($couleur);
         } else {
+            // 🟠 Cas 6 : Aucun filtre
             $touslesproduits = $produitsModel->tousLesProduits();
         }
 
@@ -39,7 +60,20 @@ class ProduitsController extends Controller
         // 🎯 Récupération des produits exclusifs
         $produitsExclusifs = $produitsModel->getProduitsExclusifs(3);
 
-        // ✅ Rendu de la page Produits
+         // Nombre de produits par page
+         $limite = 6;
+
+         // Calcul de la page actuelle et de l'offset
+         $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+         $offset = ($page - 1) * $limite;
+         $model = new ProduitsModel();
+        // ✅ Récupération des produits paginés
+        $produits = $model->getProduitsPagines($limite, $offset);
+
+        // ✅ Calcul du nombre total de pages
+        $totalProduits = $model->countProduits();
+        $totalPages = ceil($totalProduits / $limite);
+
         $this->render('produits', [
             'touslesproduits' => $touslesproduits,
             'categories' => $categories,
@@ -47,7 +81,10 @@ class ProduitsController extends Controller
             'pierres' => $pierres,
             'couleurs' => $couleurs,
             'autresProduits' => $autresProduits,
-            'produitsExclusifs' => $produitsExclusifs
+            'produitsExclusifs' => $produitsExclusifs,
+            'produits' => $produits,
+            'page' => $page,
+            'totalPages' => $totalPages
         ]);
     }
 
@@ -80,40 +117,78 @@ class ProduitsController extends Controller
     }
 
     /**
+     * ✅ Affichage des favoris
+     */
+    public function afficherFavoris()
+    {
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+    
+        $produitsModel = new ProduitsModel();
+        $favoris = $_SESSION['favoris'] ?? [];
+        $produitsFavoris = [];
+    
+        if (!empty($favoris)) {
+            foreach ($favoris as $id) {
+                $produit = $produitsModel->getProduitById($id);
+                if ($produit) {
+                    $produitsFavoris[] = $produit;
+                }
+            }
+        }
+    
+        $this->render('wishlist', [
+            'produitsFavoris' => $produitsFavoris
+        ]);
+    }
+    
+    /**
+     * ✅ Suppression des favoris
+     */
+    public function supprimerDesFavoris()
+    {
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+
+        $id = $_POST['produit_id'];
+
+        if (($key = array_search($id, $_SESSION['favoris'])) !== false) {
+            unset($_SESSION['favoris'][$key]);
+            echo json_encode(['status' => 'success']);
+        } else {
+            echo json_encode(['status' => 'error']);
+        }
+    }
+
+    /**
      * ✅ Ajout d'un produit aux favoris
      */
     public function ajouterAuxFavoris()
-{
-    if (isset($_POST['produit_id'])) {
-        $produitId = (int)$_POST['produit_id'];
-
-        // Vérifie si le produit existe
-        $produitsModel = new ProduitsModel();
-        $produit = $produitsModel->getProduitById($produitId);
-
-        if ($produit) {
-            // Initialise la liste des favoris s'il n'existe pas encore
-            if (!isset($_SESSION['favoris'])) {
-                $_SESSION['favoris'] = [];
-            }
-
-            // Ajoute le produit aux favoris
-            if (!in_array($produitId, $_SESSION['favoris'])) {
-                $_SESSION['favoris'][] = $produitId;
-                echo json_encode(['status' => 'success', 'message' => 'Produit ajouté aux favoris !']);
-                exit;
-            } else {
-                echo json_encode(['status' => 'info', 'message' => 'Ce produit est déjà dans vos favoris.']);
-                exit;
-            }
-        } else {
-            echo json_encode(['status' => 'error', 'message' => 'Produit non trouvé.']);
-            exit;
+    {
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
         }
-    } else {
-        echo json_encode(['status' => 'error', 'message' => 'ID du produit manquant.']);
+
+        $id = $_POST['produit_id'];
+
+        if (!isset($_SESSION['favoris'])) {
+            $_SESSION['favoris'] = [];
+        }
+
+        if (!in_array($id, $_SESSION['favoris'])) {
+            $_SESSION['favoris'][] = $id;
+            echo json_encode([
+                'status' => 'success',
+                'message' => 'Produit ajouté aux favoris.'
+            ]);
+        } else {
+            echo json_encode([
+                'status' => 'info',
+                'message' => 'Ce produit est déjà dans vos favoris.'
+            ]);
+        }
         exit;
     }
-}
-
 }
